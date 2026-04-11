@@ -1,6 +1,5 @@
 JavaScript
 const express = require("express");
-const fetch = require("node-fetch");
 
 const app = express();
 app.use(express.json());
@@ -18,17 +17,17 @@ app.post("/chat", async (req, res) => {
 
   try {
     const response = await fetch(
-      "https://api.affiliateplus.xyz/api/chatbot?message=" + encodeURIComponent(message) + "&owner=Aidly&botname=Aidly"
+      "https://api.affiliateplus.xyz/api/chatbot?message=" + encodeURIComponent(message)
     );
 
     const data = await response.json();
 
-    res.json({ reply: data.message || "No AI response" });
+    res.json({ reply: data.message || "No response" });
 
   } catch (error) {
     console.log(error);
-    res.json({ reply: "Server AI error ❌" });
+    res.json({ reply: "Server error ❌" });
   }
 });
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+app.listen(3000, () => console.log("Server running"));
