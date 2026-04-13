@@ -19,15 +19,15 @@ app.post("/chat", async (req, res) => {
 
   try {
     const response = await fetch(
-      "https://api.affiliateplus.xyz/api/chatbot?message=" + encodeURIComponent(message)
+      "https://api.popcat.xyz/chatbot?msg=" + encodeURIComponent(message)
     );
 
     const data = await response.json();
 
-    res.json({ reply: data.message });
+    res.json({ reply: data.response });
 
   } catch (err) {
-    res.json({ reply: "Error ❌" });
+    res.json({ reply: "AI error ❌" });
   }
 });
 
