@@ -17,18 +17,10 @@ app.post("/chat", async (req, res) => {
     return res.json({ reply: "No message" });
   }
 
-  try {
-    const response = await fetch(
-      "https://api.popcat.xyz/chatbot?msg=" + encodeURIComponent(message)
-    );
+  // 🧠 Fake AI (always works)
+  let reply = "I am Aidly AI 🤖. You said: " + message;
 
-    const data = await response.json();
-
-    res.json({ reply: data.response });
-
-  } catch (err) {
-    res.json({ reply: "AI error ❌" });
-  }
+  res.json({ reply });
 });
 
 const PORT = process.env.PORT || 3000;
