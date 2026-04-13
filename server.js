@@ -1,4 +1,3 @@
-JavaScript
 const express = require("express");
 
 const app = express();
@@ -12,7 +11,7 @@ app.post("/chat", async (req, res) => {
   const message = req.body.message;
 
   if (!message) {
-    return res.json({ reply: "No message received" });
+    return res.json({ reply: "No message" });
   }
 
   try {
@@ -22,15 +21,12 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    res.json({ reply: data.message || "No response" });
+    res.json({ reply: data.message });
 
-  } catch (error) {
-    console.log(error);
-    res.json({ reply: "Server error ❌" });
+  } catch (err) {
+    res.json({ reply: "Error ❌" });
   }
 });
 
-// ✅ دا مهم دی
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => console.log("Server running on port " + PORT));
