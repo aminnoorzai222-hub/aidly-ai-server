@@ -17,10 +17,18 @@ app.post("/chat", async (req, res) => {
     return res.json({ reply: "No message" });
   }
 
-  // 🧠 Fake AI (always works)
-  let reply = "I am Aidly AI 🤖. You said: " + message;
+  try {
+    const response = await fetch(
+      "https://api.affiliateplus.xyz/api/chatbot?message=" + encodeURIComponent(message)
+    );
 
-  res.json({ reply });
+    const data = await response.json();
+
+    res.json({ reply: data.message });
+
+  } catch (err) {
+    res.json({ reply: "AI not available ❌" });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
