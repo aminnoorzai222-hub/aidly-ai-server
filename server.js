@@ -17,32 +17,32 @@ app.post("/chat", async (req, res) => {
 
   try {
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium",
+      "https://api-inference.huggingface.co/models/google/flan-t5-small",
       {
         method: "POST",
         headers: {
           "Authorization": "Bearer " + HF_TOKEN,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ inputs: message })
+        body: JSON.stringify({
+          inputs: message
+        })
       }
     );
 
     const data = await response.json();
 
-    let reply = "🤖 I am thinking... try again";
+    let reply = "AI is thinking...";
 
-    if (Array.isArray(data) && data[0]?.generated_text) {
+    if (data && data[0]?.generated_text) {
       reply = data[0].generated_text;
-    } else if (data.generated_text) {
-      reply = data.generated_text;
     }
 
     res.json({ reply });
 
-  } catch (error) {
-    console.log(error);
-    res.json({ reply: "Server error ❌" });
+  } catch (err) {
+    console.log(err);
+    res.json({ reply: "AI error ❌" });
   }
 });
 
