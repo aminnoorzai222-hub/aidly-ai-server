@@ -6,44 +6,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const HF_TOKEN = "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";
-
 app.get("/", (req, res) => {
   res.send("Aidly AI Server is running ✅");
 });
 
 app.post("/chat", async (req, res) => {
-  const message = req.body.message;
+  const message = req.body.message.toLowerCase();
 
-  try {
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + HF_TOKEN,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          inputs: message
-        })
-      }
-    );
+  let reply = "زه Aidly AI یم 🤖";
 
-    const data = await response.json();
-
-    let reply = "AI not ready 😔";
-
-    if (data && data.generated_text) {
-      reply = data.generated_text;
-    }
-
-    res.json({ reply });
-
-  } catch (err) {
-    console.log(err);
-    res.json({ reply: "Server error ❌" });
+  if (message.includes("hello")) {
+    reply = "Hello! How can I help you?";
+  } else if (message.includes("how are you")) {
+    reply = "I'm fine 😊 What about you?";
+  } else if (message.includes("name")) {
+    reply = "I am Aidly AI 🤖";
+  } else {
+    reply = "Interesting 😄 Tell me more!";
   }
+
+  res.json({ reply });
 });
 
 const PORT = process.env.PORT || 3000;
