@@ -1,54 +1,59 @@
-const express = require("express");
-const cors = require("cors");
+import express from "express";
+import cors from "cors";
 
 const app = express();
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
+// Root route (test)
 app.get("/", (req, res) => {
-  res.send("Aidly AI Server is running ✅");
+  res.send("Chat server is running...");
 });
 
+// Chat route
 app.post("/chat", async (req, res) => {
-  const message = req.body.message.toLowerCase();
+  try {
+    const userMessage = req.body?.message;
 
-  let reply = "Interesting 😄 Tell me more!";
+    if (!userMessage) {
+      return res.json({ reply: "No message provided" });
+    }
 
-  if (message.includes("hello") || message.includes("hi")) {
-    reply = "Hello! 😊 How can I help you?";
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + process.env.GROQ_API_KEY
+      },
+      body: JSON.stringify({
+        model: "llama3-8b-8192",
+        messages: [
+          { role: "system", content: "You are a helpful assistant." },
+          { role: "user", content: userMessage }
+        ],
+        temperature: 0.7
+      })
+    });
+
+    const data = await response.json();
+
+    const reply = data?.choices?.[0]?.message?.content;
+
+    res.json({
+      reply: reply || "No response from AI"
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.json({ reply: "Server error" });
   }
-
-  else if (message.includes("how are you")) {
-    reply = "I'm fine 😄 What about you?";
-  }
-
-  else if (message.includes("name")) {
-    reply = "I am Aidly AI 🤖";
-  }
-
-  else if (message.includes("bye")) {
-    reply = "Goodbye! 👋 Have a nice day!";
-  }
-
-  else if (message.includes("thanks") || message.includes("thank you")) {
-    reply = "You're welcome 😊";
-  }
-
-  else if (message.includes("who are you")) {
-    reply = "I am your AI assistant 🤖";
-  }
-
-  else if (message.includes("what can you do")) {
-    reply = "I can chat with you and answer simple questions 😄";
-  }
-
-  else if (message.includes("time")) {
-    reply = "I can't check real time yet ⏰ but soon!";
-  }
-
-  res.json({ reply });
 });
 
+// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running"));
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
