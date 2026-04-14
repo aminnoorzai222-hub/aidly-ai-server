@@ -6,8 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔑 خپل Hugging Face token دلته واچوه
-const HF_TOKEN = "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";
+const HF_TOKEN = "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"; // خپل token
 
 app.get("/", (req, res) => {
   res.send("Aidly AI Server is running ✅");
@@ -15,10 +14,6 @@ app.get("/", (req, res) => {
 
 app.post("/chat", async (req, res) => {
   const message = req.body.message;
-
-  if (!message) {
-    return res.json({ reply: "No message" });
-  }
 
   try {
     const response = await fetch(
@@ -35,9 +30,9 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    let reply = "No response";
+    let reply = "🤖 I am thinking... try again";
 
-    if (Array.isArray(data)) {
+    if (Array.isArray(data) && data[0]?.generated_text) {
       reply = data[0].generated_text;
     } else if (data.generated_text) {
       reply = data.generated_text;
