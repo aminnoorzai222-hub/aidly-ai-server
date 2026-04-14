@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const HF_TOKEN = "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"; // خپل token
+const HF_TOKEN = "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";
 
 app.get("/", (req, res) => {
   res.send("Aidly AI Server is running ✅");
@@ -17,7 +17,7 @@ app.post("/chat", async (req, res) => {
 
   try {
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/google/flan-t5-small",
+      "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill",
       {
         method: "POST",
         headers: {
@@ -32,19 +32,19 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    let reply = "AI is thinking...";
+    let reply = "AI not ready 😔";
 
-    if (data && data[0]?.generated_text) {
-      reply = data[0].generated_text;
+    if (data && data.generated_text) {
+      reply = data.generated_text;
     }
 
     res.json({ reply });
 
   } catch (err) {
     console.log(err);
-    res.json({ reply: "AI error ❌" });
+    res.json({ reply: "Server error ❌" });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on port " + PORT));
+app.listen(PORT, () => console.log("Server running"));
