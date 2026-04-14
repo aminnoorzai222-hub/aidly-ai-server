@@ -6,7 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const HF_TOKEN = "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"; // 
+// 🔑 خپل Hugging Face token دلته واچوه
+const HF_TOKEN = "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";
 
 app.get("/", (req, res) => {
   res.send("Aidly AI Server is running ✅");
@@ -14,6 +15,10 @@ app.get("/", (req, res) => {
 
 app.post("/chat", async (req, res) => {
   const message = req.body.message;
+
+  if (!message) {
+    return res.json({ reply: "No message" });
+  }
 
   try {
     const response = await fetch(
@@ -24,22 +29,27 @@ app.post("/chat", async (req, res) => {
           "Authorization": "Bearer " + HF_TOKEN,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          inputs: message
-        })
+        body: JSON.stringify({ inputs: message })
       }
     );
 
     const data = await response.json();
 
-    res.json({
-      reply: data.generated_text || "AI error ❌"
-    });
+    let reply = "No response";
 
-  } catch (err) {
+    if (Array.isArray(data)) {
+      reply = data[0].generated_text;
+    } else if (data.generated_text) {
+      reply = data.generated_text;
+    }
+
+    res.json({ reply });
+
+  } catch (error) {
+    console.log(error);
     res.json({ reply: "Server error ❌" });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running")
+app.listen(PORT, () => console.log("Server running on port " + PORT));
