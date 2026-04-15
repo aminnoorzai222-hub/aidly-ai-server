@@ -6,10 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔥 خپل Groq API key دلته واچوه
 const GROQ_API_KEY = "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";
 
-// ✅ TEST ROUTE (ډېر مهم)
 app.get("/", (req, res) => {
   res.send("Server is running ✅");
 });
@@ -34,13 +32,14 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    const reply =
-      data.choices &&
-      data.choices[0] &&
-      data.choices[0].message &&
-      data.choices[0].message.content
-        ? data.choices[0].message.content
-        : "No response from AI";
+    // 🔥 دا به console کې هر څه وښيي
+    console.log("FULL RESPONSE:", JSON.stringify(data, null, 2));
+
+    let reply = "No response from AI";
+
+    if (data.choices && data.choices.length > 0) {
+      reply = data.choices[0].message.content;
+    }
 
     res.json({ reply });
 
@@ -53,5 +52,5 @@ app.post("/chat", async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log("Server running");
 });
