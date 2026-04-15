@@ -6,10 +6,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔑 خپل Groq API key دلته واچوه
+// 🔑 خپل API key
 const GROQ_API_KEY = "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";
 
-// 🌐 HTML + AI یو ځای
 app.get("/", (req, res) => {
   res.send(`
     <html>
@@ -44,7 +43,6 @@ app.get("/", (req, res) => {
   `);
 });
 
-// 🤖 AI ROUTE
 app.post("/chat", async (req, res) => {
   const message = req.body.message;
 
@@ -56,8 +54,8 @@ app.post("/chat", async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        // 🔥 سم model (نوې نسخه)
-        model: "llama3-70b-8192",
+        // 🔥 نوی او فعال model
+        model: "mixtral-8x7b-32768",
         messages: [
           { role: "user", content: message }
         ]
