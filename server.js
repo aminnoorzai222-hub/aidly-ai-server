@@ -3,10 +3,16 @@ const cors = require("cors");
 
 const app = express();
 
-// ✅ CORS FIX
-app.use(cors({
-  origin: "*"
-}));
+// 🔥 قوي CORS (ټول مشکلات حل کوي)
+app.use(cors());
+app.options('*', cors());
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Allow-Methods", "*");
+  next();
+});
 
 app.use(express.json());
 
@@ -18,6 +24,7 @@ app.get("/", (req, res) => {
   res.send("Server is running ✅");
 });
 
+// 🤖 AI ROUTE
 app.post("/chat", async (req, res) => {
   const message = req.body.message;
 
@@ -39,10 +46,8 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    // 🔍 DEBUG (ډېر مهم)
     console.log("AI DATA:", JSON.stringify(data, null, 2));
 
-    // 🔥 قوي parsing
     let reply = "No response from AI";
 
     if (data.choices && data.choices.length > 0) {
@@ -55,7 +60,7 @@ app.post("/chat", async (req, res) => {
 
   } catch (error) {
     console.log("ERROR:", error);
-    res.json({ reply: "Server error ❌" });
+    res.json({ reply: "Connection error ❌" });
   }
 });
 
