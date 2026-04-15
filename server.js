@@ -3,7 +3,7 @@ const cors = require("cors");
 
 const app = express();
 
-// ✅ CORS FIX (ډېر مهم)
+// ✅ CORS FIX
 app.use(cors({
   origin: "*"
 }));
@@ -13,6 +13,7 @@ app.use(express.json());
 // 🔑 خپل Groq API key دلته واچوه
 const GROQ_API_KEY = "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";
 
+// ✅ TEST ROUTE
 app.get("/", (req, res) => {
   res.send("Server is running ✅");
 });
@@ -38,13 +39,17 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    const reply =
-      data.choices &&
-      data.choices[0] &&
-      data.choices[0].message &&
-      data.choices[0].message.content
-        ? data.choices[0].message.content
-        : "No response from AI";
+    // 🔍 DEBUG (ډېر مهم)
+    console.log("AI DATA:", JSON.stringify(data, null, 2));
+
+    // 🔥 قوي parsing
+    let reply = "No response from AI";
+
+    if (data.choices && data.choices.length > 0) {
+      if (data.choices[0].message && data.choices[0].message.content) {
+        reply = data.choices[0].message.content;
+      }
+    }
 
     res.json({ reply });
 
