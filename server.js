@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔑 خپل API key
+// 🔑 API KEY
 const GROQ_API_KEY = "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";
 
 app.get("/", (req, res) => {
@@ -54,8 +54,8 @@ app.post("/chat", async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        // 🔥 نوی او فعال model
-        model: "mixtral-8x7b-32768",
+        // 🔥 نوی active model
+        model: "llama-3.1-8b-instant",
         messages: [
           { role: "user", content: message }
         ]
