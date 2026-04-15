@@ -6,40 +6,33 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔑 API KEY
 const GROQ_API_KEY = "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";
 
-// ✅ HTML همدلته serve کېږي
 app.get("/", (req, res) => {
   res.send(`
-    <html>
-      <body>
-        <h2>Aidly AI 🤖</h2>
-        <input id="input" placeholder="Type..." />
-        <button onclick="send()">Send</button>
-        <p id="output"></p>
+    <h2>Aidly AI 🤖</h2>
+    <input id="input" placeholder="Type..." />
+    <button onclick="send()">Send</button>
+    <p id="output"></p>
 
-        <script>
-          async function send() {
-            const msg = document.getElementById("input").value;
-            document.getElementById("output").innerText = "Thinking...";
+    <script>
+      async function send() {
+        const msg = document.getElementById("input").value;
+        document.getElementById("output").innerText = "Thinking...";
 
-            const res = await fetch("/chat", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ message: msg })
-            });
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
 
-            const data = await res.json();
-            document.getElementById("output").innerText = data.reply;
-          }
-        </script>
-      </body>
-    </html>
+        const data = await res.json();
+        document.getElementById("output").innerText = data.reply;
+      }
+    </script>
   `);
 });
 
-// 🤖 AI
 app.post("/chat", async (req, res) => {
   const message = req.body.message;
 
@@ -60,16 +53,22 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
+    // 🔥 دا به error ښکاره کړي
+    console.log("FULL GROQ RESPONSE:", data);
+
     let reply = "No response from AI";
 
-    if (data.choices && data.choices.length > 0) {
+    if (data.error) {
+      reply = "❌ API Error: " + data.error.message;
+    } else if (data.choices && data.choices.length > 0) {
       reply = data.choices[0].message.content;
     }
 
     res.json({ reply });
 
   } catch (err) {
-    res.json({ reply: "Error ❌" });
+    console.log(err);
+    res.json({ reply: "Server crash ❌" });
   }
 });
 
