@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
-// ✅ fetch fix (ډېر مهم)
+// ✅ fetch fix
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const app = express();
@@ -9,11 +9,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔑 خپل API key دلته واچوه
+// 🔑 یوازې دا بدل کړه
 const GROQ_API_KEY = "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";
 
 
-// 🌐 UI + History + Icon
+// 🌐 UI
 app.get("/", (req, res) => {
   res.send(`
 <!DOCTYPE html>
@@ -64,7 +64,7 @@ app.get("/", (req, res) => {
 
 <br>
 
-<input id="input" placeholder="write something..." />
+<input id="input" placeholder="write something here..." />
 <button onclick="send()">📤</button>
 
 <script>
@@ -120,7 +120,7 @@ function updateChat() {
 });
 
 
-// 🤖 AI ROUTE (SAFE)
+// 🤖 AI ROUTE
 app.post("/chat", async (req, res) => {
   let history = req.body.history || [];
 
@@ -139,14 +139,7 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: " `
-ته یو هوښیار AI یې.
-
-قوانین:
-- که کاروونکی په پښتو پوښتنه وکړي، په روانه او سمه پښتو ځواب ورکړه.
-- که کاروونکی په انګلیسي پوښتنه وکړي، په انګلیسي ځواب ورکړه.
-- بې‌معنا او ګډوډې جملې مه کاروه.
-- ځوابونه دې واضح او لنډ وي.."
+            content: "If the user writes in Pashto, reply in clear Pashto. If the user writes in English, reply in English. Keep answers simple and correct."
           },
           ...history
         ]
