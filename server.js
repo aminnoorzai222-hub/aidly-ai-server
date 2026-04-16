@@ -1,48 +1,16 @@
 const express = require("express");
 const cors = require("cors");
 
-// 🔥 fetch fix د Node 18 لپاره
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// 🔑 ⬇️⬇️⬇️ یوازې دلته خپل API key واچوه
+// 🔑 یوازې خپل API key واچوه
 const GROQ_API_KEY = "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";
-// 🔑 ⬆️⬆️⬆️
 
 app.get("/", (req, res) => {
-  res.send(`
-    <h2>Aidly AI 🤖</h2>
-    <input id="input" placeholder="یو څه ولیکه..." />
-    <button onclick="send()">Send</button>
-    <p id="output"></p>
-
-    <script>
-      async function send() {
-        const msg = document.getElementById("input").value;
-        document.getElementById("output").innerText = "Thinking...";
-
-        try {
-          const res = await fetch("/chat", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ message: msg })
-          });
-
-          const data = await res.json();
-          document.getElementById("output").innerText = data.reply;
-
-        } catch {
-          document.getElementById("output").innerText = "❌ Error";
-        }
-      }
-    </script>
-  `);
+  res.send("Server is running ✅");
 });
 
 app.post("/chat", async (req, res) => {
@@ -52,16 +20,12 @@ app.post("/chat", async (req, res) => {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": \`Bearer \${GROQ_API_KEY}\`,
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
         messages: [
-          {
-            role: "system",
-            content: "تل په روانه او سمه پښتو ځواب ورکړه."
-          },
           { role: "user", content: message }
         ]
       })
@@ -71,15 +35,13 @@ app.post("/chat", async (req, res) => {
 
     let reply = "No response from AI";
 
-    if (data.error) {
-      reply = "❌ " + data.error.message;
-    } else if (data.choices && data.choices.length > 0) {
+    if (data.choices && data.choices.length > 0) {
       reply = data.choices[0].message.content;
     }
 
     res.json({ reply });
 
-  } catch (err) {
+  } catch (error) {
     res.json({ reply: "Server error ❌" });
   }
 });
