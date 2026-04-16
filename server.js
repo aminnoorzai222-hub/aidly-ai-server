@@ -19,25 +19,36 @@ app.get("/", (req, res) => {
         <p id="output"></p>
 
         <script>
-          async function send() {
-            const msg = document.getElementById("input").value;
-            document.getElementById("output").innerText = "Thinking...";
+async function send() {
+  const msg = document.getElementById("input").value;
+  document.getElementById("output").innerText = "Thinking...";
 
-            try {
-              const res = await fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: msg })
-              });
+  try {
+    let res;
 
-              const data = await res.json();
-              document.getElementById("output").innerText = data.reply;
+    // 🔁 3 ځله کوشش کوي
+    for (let i = 0; i < 3; i++) {
+      try {
+        res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
 
-            } catch (err) {
-              document.getElementById("output").innerText = "Connection error ❌";
-            }
-          }
-        </script>
+        if (res.ok) break;
+      } catch (e) {
+        if (i === 2) throw e;
+      }
+    }
+
+    const data = await res.json();
+    document.getElementById("output").innerText = data.reply;
+
+  } catch (err) {
+    document.getElementById("output").innerText = "Retry... please wait ⏳";
+  }
+}
+</script>
       </body>
     </html>
   `);
