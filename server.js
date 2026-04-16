@@ -49,10 +49,6 @@ app.get("/", (req, res) => {
       margin: 5px;
     }
 
-    .input-box {
-      margin-top: 10px;
-    }
-
     input {
       width: 70%;
       padding: 10px;
@@ -77,10 +73,10 @@ app.get("/", (req, res) => {
 
 <div id="chat"></div>
 
-<div class="input-box">
-  <input id="input" placeholder="یو څه ولیکه..." />
-  <button onclick="send()">📤</button>
-</div>
+<br>
+
+<input id="input" placeholder="write something..." />
+<button onclick="send()">📤</button>
 
 <script>
 let history = [];
@@ -89,7 +85,6 @@ async function send() {
   const msg = document.getElementById("input").value;
   if (!msg) return;
 
-  // user message
   history.push({ role: "user", content: msg });
   updateChat();
 
@@ -102,14 +97,12 @@ async function send() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        message: msg,
         history: history
       })
     });
 
     const data = await res.json();
 
-    // AI message
     history.push({ role: "assistant", content: data.reply });
     updateChat();
 
@@ -140,9 +133,12 @@ function updateChat() {
 });
 
 
-// 🤖 AI + History
+// 🤖 AI ROUTE (SAFE HISTORY)
 app.post("/chat", async (req, res) => {
-  const history = req.body.history || [];
+  let history = req.body.history || [];
+
+  // 🔥 یوازې وروستي 6 messages
+  history = history.slice(-6);
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -174,6 +170,7 @@ app.post("/chat", async (req, res) => {
     res.json({ reply });
 
   } catch (err) {
+    console.log(err);
     res.json({ reply: "Server error ❌" });
   }
 });
