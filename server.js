@@ -10,7 +10,7 @@ app.use(express.json());
 const GROQ_API_KEY = "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";
 
 
-// 🌐 SAFE HTML (no backtick problems)
+// 🌐 UI
 app.get("/", (req, res) => {
   res.send(`
 <!DOCTYPE html>
@@ -44,6 +44,33 @@ button { background:none; border:none; font-size:20px; margin-left:10px; color:#
 <script>
 let history = [];
 
+// 🎤 Voice function
+function speak(text) {
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "ps-AF";
+  window.speechSynthesis.speak(speech);
+}
+
+// ✨ Animation message
+function addMessage(text, type) {
+  const chat = document.getElementById("chat");
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  chat.appendChild(div);
+
+  let i = 0;
+  function typeEffect() {
+    if (i < text.length) {
+      div.innerText += text.charAt(i);
+      i++;
+      setTimeout(typeEffect, 15);
+    }
+  }
+  typeEffect();
+
+  chat.scrollTop = chat.scrollHeight;
+}
+
 async function send() {
   const msg = document.getElementById("input").value;
   if (!msg) return;
@@ -63,20 +90,13 @@ async function send() {
     const data = await res.json();
 
     addMessage(data.reply, "ai");
+    speak(data.reply); // 🎤
+
     history.push({ role: "assistant", content: data.reply });
 
   } catch {
     addMessage("❌ Error", "ai");
   }
-}
-
-function addMessage(text, type) {
-  const chat = document.getElementById("chat");
-  const div = document.createElement("div");
-  div.className = "msg " + type;
-  div.innerText = text;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
 }
 </script>
 
@@ -86,7 +106,7 @@ function addMessage(text, type) {
 });
 
 
-// 🤖 AI ROUTE (FIXED STRING)
+// 🤖 AI ROUTE
 app.post("/chat", async (req, res) => {
   let history = req.body.history || [];
   history = history.slice(-6);
@@ -103,7 +123,7 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: "Reply in correct Pashto if user uses Pashto. Reply in English if user uses English."
+            content: "You are a professional Pashto AI. Reply in clear and correct Pashto. If English, reply in English."
           },
           ...history
         ]
