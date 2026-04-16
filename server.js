@@ -1,137 +1,70 @@
 const express = require("express");
 const cors = require("cors");
 
-// ✅ fetch fix (Node 18)
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// 🔑 یوازې دا بدل کړه
+// 🔑 API key
 const GROQ_API_KEY = "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";
 
 
-// 🌐 UI
+// 🌐 ساده HTML (light version)
 app.get("/", (req, res) => {
   res.send(`
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Aidly AI</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
-    #chat {
-      max-width: 400px;
-      margin: auto;
-      background: #1e293b;
-      padding: 10px;
-      border-radius: 10px;
-      height: 400px;
-      overflow-y: auto;
-    }
-    .user { text-align: right; color: #22c55e; margin: 5px; }
-    .ai { text-align: left; color: #facc15; margin: 5px; }
-    input {
-      width: 70%;
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-    button {
-      padding: 10px;
-      border: none;
-      background: #38bdf8;
-      color: black;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
-</head>
+    <h2>Aidly AI 🤖</h2>
 
-<body>
+    <input id="input" placeholder="write something here..." />
+    <button onclick="send()">📤</button>
 
-<h2>Aidly AI 🤖</h2>
+    <p id="output"></p>
 
-<div id="chat"></div>
+    <script>
+      let history = [];
 
-<br>
+      async function send() {
+        const msg = document.getElementById("input").value;
+        if (!msg) return;
 
-<input id="input" placeholder="write something here..." />
-<button onclick="send()">⬆️</button>
+        history.push({ role: "user", content: msg });
+        document.getElementById("output").innerText = "Thinking...";
 
-<script>
-let history = [];
+        try {
+          const res = await fetch("/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ history: history })
+          });
 
-async function send() {
-  const msg = document.getElementById("input").value;
-  if (!msg) return;
+          const data = await res.json();
 
-  history.push({ role: "user", content: msg });
-  updateChat();
+          history.push({ role: "assistant", content: data.reply });
+          document.getElementById("output").innerText = data.reply;
 
-  document.getElementById("input").value = "";
-
-  try {
-    const res = await fetch("/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ history: history })
-    });
-
-    const data = await res.json();
-
-    history.push({ role: "assistant", content: data.reply });
-    updateChat();
-
-  } catch {
-    history.push({ role: "assistant", content: "❌ Error accrued" });
-    updateChat();
-  }
-}
-
-function updateChat() {
-  const chat = document.getElementById("chat");
-  chat.innerHTML = "";
-
-  history.forEach(item => {
-    const div = document.createElement("div");
-    div.className = item.role === "user" ? "user" : "ai";
-    div.innerText = item.content;
-    chat.appendChild(div);
-  });
-
-  chat.scrollTop = chat.scrollHeight;
-}
-</script>
-
-</body>
-</html>
+        } catch {
+          document.getElementById("output").innerText = "❌ Error";
+        }
+      }
+    </script>
   `);
 });
 
 
-// 🤖 AI ROUTE
+// 🤖 AI ROUTE (light + safe)
 app.post("/chat", async (req, res) => {
   let history = req.body.history || [];
 
-  // ✅ history limit
-  history = history.slice(-6);
+  // ✅ لږ history (safe)
+  history = history.slice(-4);
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": \`Bearer \${GROQ_API_KEY}\`,
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -139,18 +72,7 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: `
-You are a helpful AI assistant.
-
-Rules:
-- If the user writes in Pashto, respond in clear, natural, and grammatically correct Pashto.
-- Use simple and commonly used Pashto words.
-- Avoid broken or mixed sentences.
-- If unsure, use simple Pashto instead of incorrect Pashto.
-- If the user writes in English, respond in English.
-
-Keep answers short, clear, and natural.
-`
+            content: "Reply in Pashto if user uses Pashto. Reply in English if user uses English. Keep answers simple."
           },
           ...history
         ]
@@ -159,7 +81,7 @@ Keep answers short, clear, and natural.
 
     const data = await response.json();
 
-    let reply = "No response from AI";
+    let reply = "No response";
 
     if (data.choices && data.choices.length > 0) {
       reply = data.choices[0].message.content;
@@ -169,9 +91,10 @@ Keep answers short, clear, and natural.
 
   } catch (err) {
     console.log(err);
-    res.json({ reply: "Server error ❌" });
+    res.json({ reply: "Error ❌" });
   }
 });
+
 
 const PORT = process.env.PORT || 3000;
 
