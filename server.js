@@ -10,7 +10,7 @@ app.use(express.json());
 const GROQ_API_KEY = "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";
 
 
-// 🌐 WhatsApp-style UI
+// 🌐 SAFE HTML (no backtick problems)
 app.get("/", (req, res) => {
   res.send(`
 <!DOCTYPE html>
@@ -20,61 +20,14 @@ app.get("/", (req, res) => {
 <title>Aidly AI</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #0b141a;
-}
-
-#chat {
-  padding: 10px;
-  height: 85vh;
-  overflow-y: auto;
-}
-
-.msg {
-  max-width: 70%;
-  padding: 10px;
-  margin: 5px;
-  border-radius: 10px;
-  word-wrap: break-word;
-}
-
-.user {
-  background: #005c4b;
-  color: white;
-  margin-left: auto;
-}
-
-.ai {
-  background: #202c33;
-  color: white;
-  margin-right: auto;
-}
-
-#inputBox {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  background: #202c33;
-  padding: 10px;
-}
-
-input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 20px;
-  border: none;
-}
-
-button {
-  background: none;
-  border: none;
-  font-size: 20px;
-  margin-left: 10px;
-  color: #00a884;
-}
+body { margin:0; font-family:Arial; background:#0b141a; }
+#chat { padding:10px; height:85vh; overflow-y:auto; }
+.msg { max-width:70%; padding:10px; margin:5px; border-radius:10px; }
+.user { background:#005c4b; color:white; margin-left:auto; }
+.ai { background:#202c33; color:white; margin-right:auto; }
+#inputBox { position:fixed; bottom:0; width:100%; display:flex; background:#202c33; padding:10px; }
+input { flex:1; padding:10px; border-radius:20px; border:none; }
+button { background:none; border:none; font-size:20px; margin-left:10px; color:#00a884; }
 </style>
 
 </head>
@@ -103,9 +56,7 @@ async function send() {
   try {
     const res = await fetch("/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ history: history })
     });
 
@@ -135,18 +86,16 @@ function addMessage(text, type) {
 });
 
 
-// 🤖 AI ROUTE
+// 🤖 AI ROUTE (FIXED STRING)
 app.post("/chat", async (req, res) => {
   let history = req.body.history || [];
-
-  // ✅ safe history
   history = history.slice(-6);
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": \`Bearer \${GROQ_API_KEY}\`,
+        "Authorization": "Bearer " + GROQ_API_KEY,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -154,7 +103,7 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: "If user writes in Pashto, reply in simple, correct Pashto. If English, reply in English. Avoid broken Pashto."
+            content: "Reply in correct Pashto if user uses Pashto. Reply in English if user uses English."
           },
           ...history
         ]
