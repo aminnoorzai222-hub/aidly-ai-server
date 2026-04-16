@@ -44,14 +44,14 @@ button { background:none; border:none; font-size:20px; margin-left:10px; color:#
 <script>
 let history = [];
 
-// 🎤 Voice function
+// 🎤 Voice
 function speak(text) {
   const speech = new SpeechSynthesisUtterance(text);
   speech.lang = "ps-AF";
   window.speechSynthesis.speak(speech);
 }
 
-// ✨ Animation message
+// ✨ Typing animation
 function addMessage(text, type) {
   const chat = document.getElementById("chat");
   const div = document.createElement("div");
@@ -90,12 +90,12 @@ async function send() {
     const data = await res.json();
 
     addMessage(data.reply, "ai");
-    speak(data.reply); // 🎤
+    speak(data.reply);
 
     history.push({ role: "assistant", content: data.reply });
 
   } catch {
-    addMessage("❌ Error", "ai");
+    addMessage("❌ Error accrued", "ai");
   }
 }
 </script>
@@ -106,7 +106,7 @@ async function send() {
 });
 
 
-// 🤖 AI ROUTE
+// 🤖 AI ROUTE (FIXED)
 app.post("/chat", async (req, res) => {
   let history = req.body.history || [];
   history = history.slice(-6);
@@ -123,7 +123,7 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: "You are a professional Pashto AI. Reply in clear and correct Pashto. If English, reply in English."
+            content: "Detect user language. If Pashto, reply ONLY in correct Pashto. If English, reply ONLY in English. Never mix languages. Never translate."
           },
           ...history
         ]
@@ -132,19 +132,25 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    let reply = "No response";
+    let reply = "";
 
-    if (data.choices && data.choices.length > 0) {
+    // ✅ error handling fix
+    if (data.error) {
+      reply = "❌ ستونزه رامنځته شوه";
+    } else if (data.choices && data.choices.length > 0) {
       reply = data.choices[0].message.content;
+    } else {
+      reply = "No response";
     }
 
     res.json({ reply });
 
   } catch (err) {
     console.log(err);
-    res.json({ reply: "Error ❌" });
+    res.json({ reply: "❌ Server error" });
   }
 });
+
 
 const PORT = process.env.PORT || 3000;
 
