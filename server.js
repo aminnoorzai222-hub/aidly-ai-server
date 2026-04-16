@@ -10,61 +10,143 @@ app.use(express.json());
 const GROQ_API_KEY = "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";
 
 
-// 🌐 ساده HTML (light version)
+// 🌐 WhatsApp-style UI
 app.get("/", (req, res) => {
   res.send(`
-    <h2>Aidly AI 🤖</h2>
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aidly AI</title>
 
-    <input id="input" placeholder="write something here..." />
-    <button onclick="send()">📤</button>
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0b141a;
+}
 
-    <p id="output"></p>
+#chat {
+  padding: 10px;
+  height: 85vh;
+  overflow-y: auto;
+}
 
-    <script>
-      let history = [];
+.msg {
+  max-width: 70%;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 10px;
+  word-wrap: break-word;
+}
 
-      async function send() {
-        const msg = document.getElementById("input").value;
-        if (!msg) return;
+.user {
+  background: #005c4b;
+  color: white;
+  margin-left: auto;
+}
 
-        history.push({ role: "user", content: msg });
-        document.getElementById("output").innerText = "Thinking...";
+.ai {
+  background: #202c33;
+  color: white;
+  margin-right: auto;
+}
 
-        try {
-          const res = await fetch("/chat", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ history: history })
-          });
+#inputBox {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  background: #202c33;
+  padding: 10px;
+}
 
-          const data = await res.json();
+input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+}
 
-          history.push({ role: "assistant", content: data.reply });
-          document.getElementById("output").innerText = data.reply;
+button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  margin-left: 10px;
+  color: #00a884;
+}
+</style>
 
-        } catch {
-          document.getElementById("output").innerText = "❌ Error";
-        }
-      }
-    </script>
+</head>
+
+<body>
+
+<div id="chat"></div>
+
+<div id="inputBox">
+  <input id="input" placeholder="write something..." />
+  <button onclick="send()">➤</button>
+</div>
+
+<script>
+let history = [];
+
+async function send() {
+  const msg = document.getElementById("input").value;
+  if (!msg) return;
+
+  addMessage(msg, "user");
+  history.push({ role: "user", content: msg });
+
+  document.getElementById("input").value = "";
+
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ history: history })
+    });
+
+    const data = await res.json();
+
+    addMessage(data.reply, "ai");
+    history.push({ role: "assistant", content: data.reply });
+
+  } catch {
+    addMessage("❌ Error", "ai");
+  }
+}
+
+function addMessage(text, type) {
+  const chat = document.getElementById("chat");
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+</script>
+
+</body>
+</html>
   `);
 });
 
 
-// 🤖 AI ROUTE (light + safe)
+// 🤖 AI ROUTE
 app.post("/chat", async (req, res) => {
   let history = req.body.history || [];
 
-  // ✅ لږ history (safe)
-  history = history.slice(-4);
+  // ✅ safe history
+  history = history.slice(-6);
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${GROQ_API_KEY}`,
+        "Authorization": \`Bearer \${GROQ_API_KEY}\`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -72,7 +154,7 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: "Reply in Pashto if user uses Pashto. Reply in English if user uses English. Keep answers simple."
+            content: "If user writes in Pashto, reply in simple, correct Pashto. If English, reply in English. Avoid broken Pashto."
           },
           ...history
         ]
@@ -94,7 +176,6 @@ app.post("/chat", async (req, res) => {
     res.json({ reply: "Error ❌" });
   }
 });
-
 
 const PORT = process.env.PORT || 3000;
 
