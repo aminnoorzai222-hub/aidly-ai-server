@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
-// ✅ fetch fix
+// ✅ fetch fix (Node 18)
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const app = express();
@@ -65,7 +65,7 @@ app.get("/", (req, res) => {
 <br>
 
 <input id="input" placeholder="write something here..." />
-<button onclick="send()">📤</button>
+<button onclick="send()">⬆️</button>
 
 <script>
 let history = [];
@@ -94,7 +94,7 @@ async function send() {
     updateChat();
 
   } catch {
-    history.push({ role: "assistant", content: "❌ ستونزه رامنځته شوه" });
+    history.push({ role: "assistant", content: "❌ Error accrued" });
     updateChat();
   }
 }
@@ -124,14 +124,14 @@ function updateChat() {
 app.post("/chat", async (req, res) => {
   let history = req.body.history || [];
 
-  // ✅ limit history
+  // ✅ history limit
   history = history.slice(-6);
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${GROQ_API_KEY}`,
+        "Authorization": \`Bearer \${GROQ_API_KEY}\`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -139,7 +139,18 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: "If the user writes in Pashto, reply in clear Pashto. If the user writes in English, reply in English. Keep answers simple and correct."
+            content: `
+You are a helpful AI assistant.
+
+Rules:
+- If the user writes in Pashto, respond in clear, natural, and grammatically correct Pashto.
+- Use simple and commonly used Pashto words.
+- Avoid broken or mixed sentences.
+- If unsure, use simple Pashto instead of incorrect Pashto.
+- If the user writes in English, respond in English.
+
+Keep answers short, clear, and natural.
+`
           },
           ...history
         ]
