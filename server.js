@@ -1,12 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 
+// ✅ fetch fix (ډېر مهم)
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// 🔑 خپل API key
+// 🔑 خپل API key دلته واچوه
 const GROQ_API_KEY = "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";
 
 
@@ -17,7 +20,6 @@ app.get("/", (req, res) => {
 <html>
 <head>
   <title>Aidly AI</title>
-
   <style>
     body {
       font-family: Arial;
@@ -26,7 +28,6 @@ app.get("/", (req, res) => {
       text-align: center;
       padding: 20px;
     }
-
     #chat {
       max-width: 400px;
       margin: auto;
@@ -36,26 +37,14 @@ app.get("/", (req, res) => {
       height: 400px;
       overflow-y: auto;
     }
-
-    .user {
-      text-align: right;
-      color: #22c55e;
-      margin: 5px;
-    }
-
-    .ai {
-      text-align: left;
-      color: #facc15;
-      margin: 5px;
-    }
-
+    .user { text-align: right; color: #22c55e; margin: 5px; }
+    .ai { text-align: left; color: #facc15; margin: 5px; }
     input {
       width: 70%;
       padding: 10px;
       border-radius: 5px;
       border: none;
     }
-
     button {
       padding: 10px;
       border: none;
@@ -96,9 +85,7 @@ async function send() {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        history: history
-      })
+      body: JSON.stringify({ history: history })
     });
 
     const data = await res.json();
@@ -133,18 +120,18 @@ function updateChat() {
 });
 
 
-// 🤖 AI ROUTE (SAFE HISTORY)
+// 🤖 AI ROUTE (SAFE)
 app.post("/chat", async (req, res) => {
   let history = req.body.history || [];
 
-  // 🔥 یوازې وروستي 6 messages
+  // ✅ limit history
   history = history.slice(-6);
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": \`Bearer \${GROQ_API_KEY}\`,
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -174,7 +161,6 @@ app.post("/chat", async (req, res) => {
     res.json({ reply: "Server error ❌" });
   }
 });
-
 
 const PORT = process.env.PORT || 3000;
 
