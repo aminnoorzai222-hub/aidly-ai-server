@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aidly AI</title>
+
+<style>
+body { margin:0; font-family:Arial; background:#0b141a; }
+#chat { padding:10px; height:85vh; overflow-y:auto; }
+.msg { max-width:70%; padding:10px; margin:5px; border-radius:10px; }
+.user { background:#005c4b; color:white; margin-left:auto; }
+.ai { background:#202c33; color:white; margin-right:auto; position:relative; }
+#inputBox { position:fixed; bottom:0; width:100%; display:flex; background:#202c33; padding:10px; }
+input { flex:1; padding:10px; border-radius:20px; border:none; }
+button { background:none; border:none; font-size:20px; margin-left:10px; color:#00a884; cursor:pointer; }
+.speakBtn { position:absolute; right:5px; bottom:5px; }
+</style>
+</head>
+
+<body>
+
+<div id="chat"></div>
+
+<div id="inputBox">
+  <input id="input" placeholder="write something..." />
+  <button onclick="send()">➤</button>
+</div>
+
+<script>
+let history = [];
+
+function speak(text) {
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "ps-AF";
+  window.speechSynthesis.speak(speech);
+}
+
+function addMessage(text, type) {
+  const chat = document.getElementById("chat");
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text;
+
+  if (type === "ai") {
+    const btn = document.createElement("button");
+    btn.innerText = "🔊";
+    btn.className = "speakBtn";
+    btn.onclick = () => speak(text);
+    div.appendChild(btn);
+  }
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function send() {
+  const msg = document.getElementById("input").value;
+  if (!msg) return;
+
+  addMessage(msg, "user");
+  history.push({ role: "user", content: msg });
+
+  document.getElementById("input").value = "";
+
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ history: history })
+    });
+
+    const data = await res.json();
+
+    addMessage(data.reply, "ai");
+    history.push({ role: "assistant", content: data.reply });
+
+  } catch {
+    addMessage("Error", "ai");
+  }
+}
+</script>
+
+</body>
+</html>
