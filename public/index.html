@@ -10,11 +10,34 @@ body { margin:0; font-family:Arial; background:#0b141a; }
 .msg { max-width:70%; padding:10px; margin:5px; border-radius:10px; }
 .user { background:#005c4b; color:white; margin-left:auto; }
 .ai { background:#202c33; color:white; margin-right:auto; position:relative; }
-#inputBox { position:fixed; bottom:0; width:100%; display:flex; background:#202c33; padding:10px; gap:5px; }
-input { flex:1; padding:10px; border-radius:20px; border:none; }
-button { background:none; border:none; font-size:20px; color:#00a884; cursor:pointer; }
-.speakBtn { position:absolute; right:5px; bottom:5px; font-size:14px; }
-img { max-width:200px; display:block; margin:5px; border-radius:10px; }
+#inputBox {
+  position:fixed; bottom:0; width:100%;
+  display:flex; align-items:center;
+  background:#202c33; padding:10px; gap:6px;
+}
+input {
+  flex:1; padding:10px;
+  border-radius:20px; border:none;
+}
+button {
+  background:none;
+  border:none;
+  font-size:22px;
+  color:#00a884;
+  cursor:pointer;
+}
+.speakBtn {
+  position:absolute;
+  right:5px;
+  bottom:5px;
+  font-size:14px;
+}
+img {
+  max-width:200px;
+  display:block;
+  margin:5px;
+  border-radius:10px;
+}
 </style>
 </head>
 
@@ -23,23 +46,33 @@ img { max-width:200px; display:block; margin:5px; border-radius:10px; }
 <div id="chat"></div>
 
 <div id="inputBox">
-  <button onclick="startVoice()">🎤</button>
-  <input id="input" placeholder="write something..." />
-  <input type="file" id="imageInput" accept="image/*" />
+  <!-- 🎧 Voice button (بدل شوی) -->
+  <button onclick="startVoice()"  <svg width="22" height="22" viewBox="0 0 24 24" fill="#00a884">
+    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.5h-2v-1h2v1zm2.07-7.75l-.9.92C13.45 10.9 13 11.5 13 13h-2v-.5c0-1 .45-1.75 1.17-2.47l1.24-1.26A2 2 0 0012 6a2 2 0 00-2 2H8a4 4 0 118 0c0 1.1-.45 2.1-.93 2.75z"/>
+  </svg>
+  </button>
+
+  <input id="input" placeholder="Write something..." />
+
+  <!-- 📎 Attachment -->
+  <input type="file" id="imageInput" accept="image/*" style="display:none;" />
+  <button onclick="document.getElementById('imageInput').click()">📎</button>
+
+  <!-- ➤ Send -->
   <button onclick="send()">➤</button>
 </div>
 
 <script>
 let history = [];
 
-// 🔊 Speak
+// 🔊 AI voice
 function speak(text) {
   const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = "en-US"; // Pashto اکثره نه چلېږي
+  speech.lang = "en-US";
   window.speechSynthesis.speak(speech);
 }
 
-// 💬 Message
+// 💬 message
 function addMessage(text, type) {
   const chat = document.getElementById("chat");
   const div = document.createElement("div");
@@ -58,7 +91,7 @@ function addMessage(text, type) {
   chat.scrollTop = chat.scrollHeight;
 }
 
-// 🎤 Voice input
+// 🎧 Voice input
 function startVoice() {
   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   recognition.lang = "en-US";
