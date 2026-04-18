@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-const GROQ_API_KEY = "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";
+const GROQ_API_KEY = "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";
 
 app.post("/chat", async (req, res) => {
   let history = req.body.history || [];
