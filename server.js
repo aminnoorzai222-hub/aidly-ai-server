@@ -5,7 +5,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public")); // ✅ مهم
+app.use(express.static("public"));
 
 const GROQ_API_KEY = "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";
 
@@ -25,7 +25,7 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: "Detect language. If Pashto → Pashto only. If English → English only. No mixing."
+            content: "Detect language. If Pashto reply in Pashto. If English reply in English. Do not mix."
           },
           ...history
         ]
@@ -34,10 +34,15 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    let reply = "❌ Error";
+    let reply = "";
 
-    if (data && data.choices && data.choices.length > 0) {
+    if (data.error) {
+      console.log(data.error);
+      reply = "❌ AI error";
+    } else if (data.choices && data.choices.length > 0) {
       reply = data.choices[0].message.content;
+    } else {
+      reply = "❌ No response";
     }
 
     res.json({ reply });
