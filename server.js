@@ -36,21 +36,22 @@ app.post("/chat", async (req, res) => {
 
     let reply = "";
 
-   let reply = "";
+    // ✅ REAL ERROR SHOW
+    if (data.error) {
+      console.log("AI ERROR:", data.error);
+      reply = "❌ " + data.error.message;
+    } 
+    else if (data.choices && data.choices.length > 0) {
+      reply = data.choices[0].message.content;
+    } 
+    else {
+      reply = "❌ No response from AI";
+    }
 
-if (data.error) {
-  reply = "❌ " + data.error.message;
-} 
-else if (data.choices && data.choices.length > 0) {
-  reply = data.choices[0].message.content;
-} 
-else {
-  reply = "❌ No response from AI";
-} 
     res.json({ reply });
 
   } catch (err) {
-    console.log(err);
+    console.log("SERVER ERROR:", err);
     res.json({ reply: "❌ Server error" });
   }
 });
