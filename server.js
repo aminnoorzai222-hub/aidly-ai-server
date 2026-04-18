@@ -36,15 +36,17 @@ app.post("/chat", async (req, res) => {
 
     let reply = "";
 
-    if (data.error) {
-      console.log(data.error);
-      reply = "❌ AI error";
-    } else if (data.choices && data.choices.length > 0) {
-      reply = data.choices[0].message.content;
-    } else {
-      reply = "❌ No response";
-    }
+   let reply = "";
 
+if (data.error) {
+  reply = "❌ " + data.error.message;
+} 
+else if (data.choices && data.choices.length > 0) {
+  reply = data.choices[0].message.content;
+} 
+else {
+  reply = "❌ No response from AI";
+} 
     res.json({ reply });
 
   } catch (err) {
