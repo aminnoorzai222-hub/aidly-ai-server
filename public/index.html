@@ -69,7 +69,7 @@ img {
 <script>
 let history = [];
 
-// ✅ ENTER FIX (SAFE)
+// ✅ ENTER FIX
 window.onload = function() {
   document.getElementById("input").addEventListener("keydown", function(e) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -131,20 +131,23 @@ document.getElementById("imageInput").addEventListener("change", function() {
   reader.readAsDataURL(file);
 });
 
-// 🚀 send
+// 🚀 SEND (FIXED WITH FETCH)
 async function send() {
-  const msg = document.getElementById("input").value;
+  const input = document.getElementById("input");
+  const msg = input.value.trim();
   if (!msg) return;
 
   addMessage(msg, "user");
   history.push({ role: "user", content: msg });
 
-  document.getElementById("input").value = "";
+  input.value = "";
 
   try {
     const res = await fetch("/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ history: history })
     });
 
@@ -153,8 +156,8 @@ async function send() {
     addMessage(data.reply, "ai");
     history.push({ role: "assistant", content: data.reply });
 
-  } catch {
-    addMessage("❌ Error", "ai");
+  } catch (err) {
+    addMessage("❌ Connection error", "ai");
   }
 }
 </script>
