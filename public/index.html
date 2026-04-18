@@ -68,6 +68,16 @@ img {
 
 <script>
 let history = [];
+  window.onload = function() {
+
+  document.getElementById("input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  });
+
+};
 
 // 🔊 AI voice
 function speak(text) {
