@@ -47,7 +47,7 @@ img {
 
 <div id="inputBox">
 
-  <!-- 🎤 Voice SVG -->
+  <!-- 🎤 Voice -->
   <button onclick="startVoice()" title="Voice">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="#00a884">
       <path d="M12 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z"/>
@@ -68,16 +68,6 @@ img {
 
 <script>
 let history = [];
-
-// ✅ ENTER FIX
-window.onload = function() {
-  document.getElementById("input").addEventListener("keydown", function(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      send();
-    }
-  });
-};
 
 // 🔊 voice output
 function speak(text) {
@@ -117,7 +107,7 @@ function startVoice() {
   recognition.start();
 }
 
-// 📷 image
+// 📷 image upload
 document.getElementById("imageInput").addEventListener("change", function() {
   const file = this.files[0];
   if (!file) return;
@@ -131,7 +121,7 @@ document.getElementById("imageInput").addEventListener("change", function() {
   reader.readAsDataURL(file);
 });
 
-// 🚀 SEND (FIXED WITH FETCH)
+// 🚀 SEND
 async function send() {
   const input = document.getElementById("input");
   const msg = input.value.trim();
@@ -160,6 +150,20 @@ async function send() {
     addMessage("❌ Connection error", "ai");
   }
 }
+
+// ✅ SAFE ENTER FIX (NO CRASH)
+setTimeout(() => {
+  const inputBox = document.getElementById("input");
+
+  if (inputBox) {
+    inputBox.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        send();
+      }
+    });
+  }
+}, 500);
 </script>
 
 </body>
